@@ -1,0 +1,8 @@
+# Per-architecture base image for the Home Assistant builder. The wrapper's base is the upstream
+# labelito image (already multi-arch), so both architectures point at the same tag. Renovate keeps
+# these in lockstep with the Dockerfile ARG default and config.yaml's `version` on every release.
+build_from:
+  aarch64: ghcr.io/chiva/labelito:0.1.3
+  amd64: ghcr.io/chiva/labelito:0.1.3
+labels:
+  io.hass.type: addon

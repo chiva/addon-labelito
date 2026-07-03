@@ -1,0 +1,54 @@
+# Home Assistant add-on manifest. `image:` makes this a pull-based add-on: when installed from
+# the custom repository, the Supervisor pulls ghcr.io/chiva/labelito-addon:<version> instead of
+# building locally, so `version` MUST match a tag published by the build pipeline
+# (.github/workflows/builder.yaml). The add-on version tracks the wrapped labelito release;
+# Renovate bumps it together with the Dockerfile FROM tag, and the prepare job in build-app.yaml
+# fails the build (before any publish) if they ever drift apart.
+name: Labelito
+version: "0.1.3"
+slug: labelito
+description: Self-hosted label printing for Brother QL printers
+url: https://github.com/chiva/addon-labelito
+arch:
+  - aarch64
+  - amd64
+image: ghcr.io/chiva/labelito-addon
+startup: services
+# Home Assistant authenticates ingress; the wrapper points labelito's PROXY_PATH_HEADER at
+# X-Ingress-Path so every generated URL stays prefix-correct behind the ingress proxy.
+ingress: true
+ingress_port: 8765
+panel_icon: mdi:printer
+# Direct (non-ingress) access is opt-in: the port stays closed unless the user maps it, and
+# run.sh refuses to start when the port is open with no api_token set.
+ports:
+  8765/tcp: null
+ports_description:
+  8765/tcp: Direct HTTP API/UI access without ingress (requires an API token — leave disabled for ingress-only use)
+# No `webui:` — with ingress enabled the sidebar panel is the entry point (the add-on linter
+# rejects webui alongside ingress). No `watchdog:` either — it is obsolete; the Supervisor uses
+# the native Docker HEALTHCHECK inherited from the upstream labelito image (GET /health).
+# usb:// printers need the raw device nodes; harmless when the printer is tcp://.
+usb: true
+# /config inside the container → addon_configs/<repo>_labelito/ on the host: user-editable
+# label templates live there and survive add-on updates.
+map:
+  - addon_config:rw
+# Supervisor API access backs the port-exposure guard and the discovery announcement in run.sh.
+hassio_api: true
+# Announce host/port/token so the ha-labelito integration can offer one-click setup.
+discovery:
+  - labelito
+options:
+  model: QL-810W
+  printer_uri: tcp://192.168.1.100:9100
+  editor_enabled: false
+  default_language: en
+  log_level: info
+schema:
+  model: str
+  printer_uri: str
+  api_token: password?
+  editor_enabled: bool
+  default_language: list(en|es|de|fr|it|nl|pl|pt)
+  log_level: list(debug|info|warning|error)

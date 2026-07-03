@@ -1,0 +1,228 @@
+# Reusable build pipeline for the add-on, mirroring home-assistant/apps-example. Called by
+# builder.yaml with publish=false on PRs (build only, prove the image compiles) and publish=true
+# on pushes to main (publish the multi-arch image the Supervisor pulls).
+name: Build add-on
+
+on:
+  workflow_call:
+    inputs:
+      app:
+        required: true
+        type: string
+      publish:
+        required: true
+        type: boolean
+    secrets:
+      # Reusable workflows do not inherit secrets unless passed. Only the publish caller
+      # supplies this (GITHUB_TOKEN); PR validation builds nothing to push, so it stays unset.
+      registry-token:
+        required: false
+
+jobs:
+  prepare:
+    name: Prepare
+    if: github.repository == 'chiva/addon-labelito'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      architectures: ${{ steps.info.outputs.architectures }}
+      build_matrix: ${{ steps.matrix.outputs.matrix }}
+      image_name: ${{ steps.normalize.outputs.image_name }}
+      name: ${{ steps.normalize.outputs.name }}
+      description: ${{ steps.normalize.outputs.description }}
+      url: ${{ steps.normalize.outputs.url }}
+      registry_prefix: ${{ steps.normalize.outputs.registry_prefix }}
+      version: ${{ steps.normalize.outputs.version }}
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      # Hard gate on the build/publish path (every build job needs: prepare): config.yaml
+      # version, both build.yaml build_from tags, and the Dockerfile ARG default all name the
+      # wrapped upstream release and MUST agree. A partial bump would otherwise publish
+      # labelito-addon:<new> while still wrapping the old base image. Runs on PRs and pushes,
+      # so a direct push to main cannot bypass it the way a non-required lint check could.
+      - name: Verify release version declarations agree
+        env:
+          APP: ${{ inputs.app }}
+        run: |
+          config_version="$(yq '.version' "${APP}/config.yaml")"
+          aarch64_tag="$(yq '.build_from.aarch64' "${APP}/build.yaml")"; aarch64_tag="${aarch64_tag##*:}"
+          amd64_tag="$(yq '.build_from.amd64' "${APP}/build.yaml")"; amd64_tag="${amd64_tag##*:}"
+          dockerfile_tag="$(grep -oE '^ARG BUILD_FROM=[^[:space:]]+' "${APP}/Dockerfile")"; dockerfile_tag="${dockerfile_tag##*:}"
+
+          echo "config.yaml version:       ${config_version}"
+          echo "build.yaml aarch64 tag:    ${aarch64_tag}"
+          echo "build.yaml amd64 tag:      ${amd64_tag}"
+          echo "Dockerfile BUILD_FROM tag: ${dockerfile_tag}"
+
+          status=0
+          for tag in "${aarch64_tag}" "${amd64_tag}" "${dockerfile_tag}"; do
+            if [[ "${tag}" != "${config_version}" ]]; then
+              status=1
+            fi
+          done
+
+          if [[ "${status}" -ne 0 ]]; then
+            echo "::error::Release version declarations are out of lockstep; all must equal ${config_version}"
+            exit 1
+          fi
+          echo "All release version declarations agree on ${config_version}"
+
+      # Supplies the architecture list for the build matrix and the cosmetic OCI-label fields.
+      # Pinned to an immutable commit (home-assistant/actions master @ 2026-07-03) rather than
+      # the mutable @master, so this third-party action cannot change under the privileged
+      # publish path. The publish target itself is read from config.yaml below, not from here.
+      - name: Get add-on architectures
+        id: info
+        uses: home-assistant/actions/helpers/info@f4ca6f671bd429efb108c0f2fa0ae8af0215986c
+        with:
+          path: "./${{ inputs.app }}"
+
+      - name: Normalize add-on information
+        id: normalize
+        # The publish target (image_name, registry_prefix, version) is what the Supervisor pulls,
+        # so it is read straight from the add-on's own config.yaml via yq — the same source of
+        # truth the Supervisor uses — not from the info@master helper the packages-write publish
+        # jobs would otherwise trust. image/version are asserted single-line and space-free, and
+        # the cosmetic OCI-label fields (name/description/url) are rejected if they contain a
+        # newline, so no value can smuggle an extra line into $GITHUB_OUTPUT.
+        env:
+          APP: ${{ inputs.app }}
+          ADDON_NAME: ${{ steps.info.outputs.name }}
+          ADDON_DESCRIPTION: ${{ steps.info.outputs.description }}
+          ADDON_URL: ${{ steps.info.outputs.url }}
+        run: |
+          fail() { echo "::error::$1"; exit 1; }
+
+          image="$(yq '.image' "${APP}/config.yaml")"
+          version="$(yq '.version' "${APP}/config.yaml")"
+
+          [[ -n "${image}" && "${image}" != "null" ]] || fail "${APP}/config.yaml .image is empty"
+          [[ "${image}" != *[[:space:]]* ]] || fail "${APP}/config.yaml .image has whitespace: '${image}'"
+          [[ -n "${version}" && "${version}" != "null" ]] || fail "${APP}/config.yaml .version is empty"
+          [[ "${version}" != *[[:space:]]* ]] || fail "${APP}/config.yaml .version has whitespace: '${version}'"
+
+          for field in ADDON_NAME ADDON_DESCRIPTION ADDON_URL; do
+            case "${!field}" in
+              *$'\n'* | *$'\r'*) fail "${field} contains a newline" ;;
+            esac
+          done
+
+          {
+            echo "image_name=${image##*/}"
+            echo "registry_prefix=${image%/*}"
+            echo "version=${version}"
+            echo "name=${ADDON_NAME}"
+            echo "description=${ADDON_DESCRIPTION}"
+          } >> "$GITHUB_OUTPUT"
+          if [[ -n "${ADDON_URL}" && "${ADDON_URL}" != "null" ]]; then
+            echo "url=${ADDON_URL}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Prepare build matrix
+        id: matrix
+        uses: home-assistant/builder/actions/prepare-multi-arch-matrix@2026.06.0
+        with:
+          architectures: ${{ steps.info.outputs.architectures }}
+          image-name: ${{ steps.normalize.outputs.image_name }}
+          registry-prefix: ${{ steps.normalize.outputs.registry_prefix }}
+
+  # PR validation (publish=false): build every arch to prove the image compiles.
+  # Nothing is pushed, so this job runs with a read-only token — no registry
+  # credentials are exposed to the PR build path. GitHub Actions permissions are
+  # static (no expressions), so validation and publish are separate jobs gated by
+  # `inputs.publish` rather than one job with conditional privileges.
+  build:
+    name: Build ${{ matrix.arch }} image
+    needs: prepare
+    if: ${{ !inputs.publish }}
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.prepare.outputs.build_matrix) }}
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Build image
+        uses: home-assistant/builder/actions/build-image@2026.06.0
+        with:
+          arch: ${{ matrix.arch }}
+          context: "./${{ inputs.app }}"
+          image: ${{ matrix.image }}
+          image-tags: |
+            ${{ needs.prepare.outputs.version }}
+            latest
+          labels: |
+            io.hass.type=addon
+            io.hass.name=${{ needs.prepare.outputs.name }}
+            io.hass.description=${{ needs.prepare.outputs.description }}
+            io.hass.version=${{ needs.prepare.outputs.version }}
+            ${{ needs.prepare.outputs.url && format('io.hass.url={0}', needs.prepare.outputs.url) || '' }}
+          push: false
+          version: ${{ needs.prepare.outputs.version }}
+
+  # Publish path (publish=true, push to main only): build and push each arch.
+  # This is the only job granted `packages: write`, and only ever runs on push.
+  publish:
+    name: Publish ${{ matrix.arch }} image
+    needs: prepare
+    if: ${{ inputs.publish }}
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.prepare.outputs.build_matrix) }}
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Build and push image
+        uses: home-assistant/builder/actions/build-image@2026.06.0
+        with:
+          arch: ${{ matrix.arch }}
+          container-registry-password: ${{ secrets.registry-token }}
+          context: "./${{ inputs.app }}"
+          image: ${{ matrix.image }}
+          image-tags: |
+            ${{ needs.prepare.outputs.version }}
+            latest
+          labels: |
+            io.hass.type=addon
+            io.hass.name=${{ needs.prepare.outputs.name }}
+            io.hass.description=${{ needs.prepare.outputs.description }}
+            io.hass.version=${{ needs.prepare.outputs.version }}
+            ${{ needs.prepare.outputs.url && format('io.hass.url={0}', needs.prepare.outputs.url) || '' }}
+          push: true
+          version: ${{ needs.prepare.outputs.version }}
+
+  manifest:
+    name: Publish multi-arch manifest
+    needs: [prepare, publish]
+    if: inputs.publish
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+      - name: Publish multi-arch manifest
+        uses: home-assistant/builder/actions/publish-multi-arch-manifest@2026.06.0
+        with:
+          architectures: ${{ needs.prepare.outputs.architectures }}
+          container-registry-password: ${{ secrets.registry-token }}
+          image-name: ${{ needs.prepare.outputs.image_name }}
+          image-tags: |
+            ${{ needs.prepare.outputs.version }}
+            latest
+          registry-prefix: ${{ needs.prepare.outputs.registry_prefix }}

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:best-practices"],
+  "enabledManagers": ["github-actions", "dockerfile", "custom.regex"],
+  "minimumReleaseAge": "3 days",
+  "customManagers": [
+    {
+      "description": "config.yaml's `version` is the tag the Supervisor pulls, and it tracks the wrapped labelito release — treat it as a docker dependency on ghcr.io/chiva/labelito.",
+      "customType": "regex",
+      "managerFilePatterns": ["/^labelito\\/config\\.yaml$/"],
+      "matchStrings": ["version: \"(?<currentValue>[^\"]+)\""],
+      "depNameTemplate": "ghcr.io/chiva/labelito",
+      "datasourceTemplate": "docker",
+      "versioningTemplate": "semver"
+    },
+    {
+      "description": "build.yaml's build_from tags are the per-arch base the HA builder injects; keep them on the same labelito release as config.yaml and the Dockerfile ARG.",
+      "customType": "regex",
+      "managerFilePatterns": ["/^labelito\\/build\\.yaml$/"],
+      "matchStrings": ["ghcr\\.io/chiva/labelito:(?<currentValue>[^\"\\s]+)"],
+      "depNameTemplate": "ghcr.io/chiva/labelito",
+      "datasourceTemplate": "docker",
+      "versioningTemplate": "semver"
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "One PR bumps the Dockerfile ARG, build.yaml, and config.yaml's version together, keeping image tag and manifest in lockstep.",
+      "matchPackageNames": ["ghcr.io/chiva/labelito"],
+      "groupName": "labelito release"
+    },
+    {
+      "description": "config:best-practices enables docker:pinDigests, but the wrapped-labelito base is intentionally tracked by human-readable version tag (kept in lockstep across config.yaml, build.yaml, and the Dockerfile ARG, and verifiable via the signed upstream image). Digest-pinning it would break that invariant, so keep tag-based updates for Docker while retaining Action SHA pinning.",
+      "matchDatasources": ["docker"],
+      "pinDigests": false
+    }
+  ]
+}

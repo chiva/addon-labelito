@@ -1,0 +1,20 @@
+# Enforce a Conventional Commit PR title. With squash-merge configured to use the PR title, the
+# merged commit inherits a validated conventional message — consistent with the core labelito repo
+# and keeping the door open for an auto-generated CHANGELOG later.
+name: PR title
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+
+permissions:
+  pull-requests: read
+
+jobs:
+  conventional:
+    name: Conventional commit PR title
+    runs-on: ubuntu-latest
+    steps:
+      - uses: amannn/action-semantic-pull-request@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

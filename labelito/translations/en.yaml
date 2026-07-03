@@ -1,0 +1,31 @@
+configuration:
+  model:
+    name: Printer model
+    description: >-
+      Brother QL model connected to this add-on, e.g. QL-810W. Must match the physical
+      printer — labelito cross-checks it against what the printer reports.
+  printer_uri:
+    name: Printer URI
+    description: >-
+      Where the printer lives. Network printers: tcp://<ip>:9100. USB printers:
+      usb://0x04f9:0x209c (vendor:product id — see the Documentation tab).
+  api_token:
+    name: API token
+    description: >-
+      Bearer token protecting the HTTP API. Optional while access is ingress-only (Home
+      Assistant already authenticates ingress); required if you open the port below.
+  editor_enabled:
+    name: Template studio
+    description: >-
+      Enable the YAML template studio, including saving templates into this add-on's
+      config folder.
+  default_language:
+    name: Default label language
+    description: Language used for label chrome text unless a print request overrides it.
+  log_level:
+    name: Log level
+    description: Verbosity of the add-on's web-server logs.
+network:
+  8765/tcp: >-
+    Direct HTTP access without ingress. Leave disabled unless something outside Home
+    Assistant needs the API; an API token is required when enabled.

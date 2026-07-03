@@ -1,0 +1,110 @@
+# Detects which add-on changed and drives build-app.yaml: build-only on PRs, build+publish on
+# pushes to main. On a Renovate merge that bumps build.yaml/config.yaml version, this publishes
+# the new wrapper image the Supervisor pulls. Mirrors home-assistant/apps-example.
+name: Builder
+
+env:
+  MONITORED_FILES: "config.yaml Dockerfile build.yaml run.sh addon_init.py"
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  # Manual recovery/republish path: rebuild and republish every add-on at its current
+  # config.yaml version, bypassing the changed-file filter. Use after a failed/partial run
+  # or a transient GHCR error; re-pushing the same tags is idempotent.
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  init:
+    name: Initialize builds
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.filter.outputs.changed }}
+      changed_apps: ${{ steps.filter.outputs.changed_apps }}
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Get changed files
+        id: changed_files
+        uses: tj-actions/changed-files@v47
+
+      - name: Find add-on directories
+        id: apps
+        uses: home-assistant/actions/helpers/find-addons@master
+
+      - name: Filter changed add-ons
+        id: filter
+        env:
+          APPS: ${{ steps.apps.outputs.addons }}
+          CHANGED_FILES: ${{ steps.changed_files.outputs.all_changed_files }}
+        run: |
+          changed_apps=()
+
+          # Rebuild every add-on on a manual dispatch (no diff to filter on) or when a build
+          # workflow itself changed.
+          if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" || "${CHANGED_FILES}" =~ \.github/workflows/(builder|build-app)\.yaml ]]; then
+            changed_apps=(${APPS})
+          else
+            for app in ${APPS}; do
+              for file in ${MONITORED_FILES}; do
+                if [[ "${CHANGED_FILES}" =~ ${app}/${file} ]]; then
+                  changed_apps+=("${app}")
+                  break
+                fi
+              done
+            done
+          fi
+
+          if [[ ${#changed_apps[@]} -gt 0 ]]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "changed_apps=$(jq -nc '$ARGS.positional' --args "${changed_apps[@]}")" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  # PR validation: build only, with a read-only token. No registry credentials reach the
+  # PR path. (Actions permissions are static, so PR and push are separate caller jobs.)
+  validate:
+    name: Validate ${{ matrix.app }}
+    needs: init
+    if: needs.init.outputs.changed == 'true' && github.event_name == 'pull_request'
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        app: ${{ fromJSON(needs.init.outputs.changed_apps) }}
+    uses: ./.github/workflows/build-app.yaml
+    with:
+      app: ${{ matrix.app }}
+      publish: false
+
+  # Push to main: build and publish the multi-arch image. `packages: write` is granted only
+  # here. GITHUB_TOKEN is available to the reusable workflow without `secrets: inherit`.
+  publish:
+    name: Publish ${{ matrix.app }}
+    needs: init
+    # Only ever publish from main. `push` is already main-only, but workflow_dispatch can target
+    # any branch/tag, so this ref guard stops a manual run from pushing production tags off main.
+    if: needs.init.outputs.changed == 'true' && github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        app: ${{ fromJSON(needs.init.outputs.changed_apps) }}
+    uses: ./.github/workflows/build-app.yaml
+    with:
+      app: ${{ matrix.app }}
+      publish: true
+    secrets:
+      registry-token: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,14 @@
+---
+# yamllint config for the add-on repo. The workflow files carry long descriptive comments and
+# bash conditionals, and GitHub Actions files legitimately use the `on:` key and no `---` start,
+# so the default 80-col / document-start / truthy rules produce noise rather than signal here.
+extends: default
+
+rules:
+  # Long comments and inline bash in workflows are intentional; don't fail the build on width.
+  line-length: disable
+  # Workflow and add-on manifests don't need an explicit document start marker.
+  document-start: disable
+  # Allow the GitHub Actions `on:` key without flagging it as a truthy value.
+  truthy:
+    check-keys: false
