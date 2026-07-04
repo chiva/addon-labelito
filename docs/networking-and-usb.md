@@ -9,7 +9,7 @@ tcp://<printer-ip>:9100
 ```
 
 Give the printer a **static IP or a DHCP reservation** so the URI stays valid across reboots.
-Labelito also queries the printer over **SNMP** for live status — loaded media (which backs the
+labelito also queries the printer over **SNMP** for live status — loaded media (which backs the
 pre-flight media-mismatch guard), errors, and the lifetime label counter. No extra configuration
 is needed; SNMP is read-only and never touches the print path.
 
@@ -31,5 +31,5 @@ polls it less aggressively. See the upstream
 
 ## Model mismatch
 
-Labelito cross-checks the configured `model` against what the printer reports and flags a mismatch
+labelito cross-checks the configured `model` against what the printer reports and flags a mismatch
 (surfaced as a fault in Home Assistant). If you change printers, update `model` to match.

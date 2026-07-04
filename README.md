@@ -1,14 +1,14 @@
-# Labelito Home Assistant Add-on
+# labelito Home Assistant Add-on
 
-Run [Labelito](https://github.com/chiva/labelito) — self-hosted label printing for Brother QL
+Run [labelito](https://github.com/chiva/labelito) — self-hosted label printing for Brother QL
 printers — as a one-click Home Assistant add-on, with ingress-authenticated access and Supervisor
 discovery.
 
 [![Add repository to my Home Assistant](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fchiva%2Faddon-labelito)
 
-## The Labelito ecosystem
+## The labelito ecosystem
 
-Labelito is three pieces. You do **not** need all of them — pick what fits your setup:
+labelito is three pieces. You do **not** need all of them — pick what fits your setup:
 
 | Project | What it is | Use it when |
 | --- | --- | --- |
@@ -23,7 +23,7 @@ confirmation click once both are installed.
 
 1. Click the badge above (or add `https://github.com/chiva/addon-labelito` under
    **Settings → Add-ons → Add-on store → ⋮ → Repositories**).
-2. Install the **Labelito** add-on from the store.
+2. Install the **labelito** add-on from the store.
 3. Set your printer model and URI in the add-on configuration, then start it.
 4. Open the web UI from the sidebar (ingress — no port or token setup needed).
 
@@ -40,7 +40,7 @@ Full configuration, security, and printer setup live in the add-on's **Documenta
 
 | Add-on | Description |
 | --- | --- |
-| [Labelito](labelito/) | Design label templates once, print them from the web UI, the HTTP API, or Home Assistant. |
+| [labelito](labelito/) | Design label templates once, print them from the web UI, the HTTP API, or Home Assistant. |
 
 ## How this repository works
 

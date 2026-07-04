@@ -1,4 +1,4 @@
-# Home Assistant Add-on: Labelito
+# Home Assistant Add-on: labelito
 
 _Self-hosted label printing for Brother QL printers — design templates once, print them from the
 web UI, the HTTP API, or Home Assistant._
