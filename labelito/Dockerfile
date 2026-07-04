@@ -8,7 +8,7 @@
 ARG BUILD_FROM=ghcr.io/chiva/labelito:0.1.3
 FROM ${BUILD_FROM}
 
-LABEL org.opencontainers.image.title="Labelito add-on" \
+LABEL org.opencontainers.image.title="labelito add-on" \
       org.opencontainers.image.description="Home Assistant add-on wrapping the labelito label-printing service" \
       org.opencontainers.image.source="https://github.com/chiva/addon-labelito" \
       io.hass.type="addon"

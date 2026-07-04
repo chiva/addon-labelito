@@ -1,4 +1,4 @@
-# Labelito
+# labelito
 
 Self-hosted label printing for Brother QL printers. Design label templates once in YAML,
 then print them from the web UI, the HTTP API, or Home Assistant automations. This add-on
@@ -8,14 +8,14 @@ version always equals the wrapped labelito version.
 ## Quick start
 
 1. Set **Printer model** and **Printer URI** in the configuration tab.
-2. Start the add-on and open **Labelito** from the sidebar.
+2. Start the add-on and open **labelito** from the sidebar.
 3. Pick a template, fill its fields, check the live preview, print.
 
 ## Configuration
 
 | Option | Default | Description |
 | --- | --- | --- |
-| `model` | `QL-810W` | Brother QL model connected to this add-on. Labelito cross-checks it against what the printer reports and flags a mismatch. |
+| `model` | `QL-810W` | Brother QL model connected to this add-on. labelito cross-checks it against what the printer reports and flags a mismatch. |
 | `printer_uri` | `tcp://192.168.1.100:9100` | Network printers: `tcp://<ip>:9100`. USB printers: `usb://0x04f9:0x209c` (`vendorId:productId` — find yours under **Settings → System → Hardware** or with `lsusb`). |
 | `api_token` | *(unset)* | Bearer token protecting the HTTP API. Optional while access is ingress-only; **required if you open the host port** (see below). |
 | `editor_enabled` | `false` | Enable the YAML template studio, including saving templates into this add-on's config folder. |
@@ -48,7 +48,7 @@ Template format, fields, computed dates, icons, and QR codes are documented in t
 ## Printers
 
 - **Network (recommended):** `tcp://<ip>:9100`. Give the printer a static IP or DHCP
-  reservation. Labelito also reads live status over SNMP (media, errors, label counter).
+  reservation. labelito also reads live status over SNMP (media, errors, label counter).
 - **USB:** `usb://<vendorId>:<productId>` (e.g. `usb://0x04f9:0x209c` for a QL-810W).
 
 Finding USB ids, DHCP tips, and the SNMP status details are in
