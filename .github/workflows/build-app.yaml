@@ -177,9 +177,12 @@ jobs:
     needs: prepare
     if: ${{ inputs.publish }}
     runs-on: ${{ matrix.os }}
-    permissions:
-      contents: read
-      packages: write
+    # Permissions are inherited from the calling job, not declared here. GitHub validates a
+    # reusable workflow's job permissions against EVERY caller at startup, statically, ignoring
+    # `if:` guards. The PR-path caller (builder.yaml `validate`) grants only `contents: read`, so
+    # a hardcoded `packages: write` here fails the whole run at startup even though this job is
+    # gated off on PRs. Inheriting instead: the publish caller grants `packages: write`, the
+    # validate caller grants read-only (and this job never runs there anyway).
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.prepare.outputs.build_matrix) }}
@@ -213,8 +216,9 @@ jobs:
     needs: [prepare, publish]
     if: inputs.publish
     runs-on: ubuntu-latest
-    permissions:
-      packages: write
+    # Inherits permissions from the calling job (see the note on `publish` above): the publish
+    # caller grants `packages: write`; hardcoding it here would fail startup validation against
+    # the read-only PR caller.
     steps:
       - name: Publish multi-arch manifest
         uses: home-assistant/builder/actions/publish-multi-arch-manifest@4de35182ce1e329181bffcbcc84d33db5e2c7e10 # 2026.06.0
