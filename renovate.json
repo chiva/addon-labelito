@@ -25,9 +25,10 @@
   ],
   "packageRules": [
     {
-      "description": "One PR bumps the Dockerfile ARG, build.yaml, and config.yaml's version together, keeping image tag and manifest in lockstep.",
+      "description": "One PR bumps the Dockerfile ARG, build.yaml, and config.yaml's version together, keeping image tag and manifest in lockstep. This add-on just wraps upstream labelito, so skip the global minimumReleaseAge buffer and track new releases immediately to stay aligned.",
       "matchPackageNames": ["ghcr.io/chiva/labelito"],
-      "groupName": "labelito release"
+      "groupName": "labelito release",
+      "minimumReleaseAge": "0 days"
     },
     {
       "description": "config:best-practices enables docker:pinDigests, but the wrapped-labelito base is intentionally tracked by human-readable version tag (kept in lockstep across config.yaml, build.yaml, and the Dockerfile ARG, and verifiable via the signed upstream image). Digest-pinning it would break that invariant, so keep tag-based updates for Docker while retaining Action SHA pinning.",
