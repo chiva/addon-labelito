@@ -98,6 +98,12 @@ jobs:
     permissions:
       contents: read
       packages: write
+      # The build-image action signs the pushed digest with cosign keyless (Fulcio), which needs
+      # an ambient GitHub OIDC token. Without id-token: write cosign falls back to the interactive
+      # device flow and hangs until the retry budget is exhausted (see run 28756234885). Granted at
+      # the caller, not in build-app.yaml's publish job, which inherits permissions: hardcoding it
+      # in the reusable job would fail startup validation against the read-only PR caller.
+      id-token: write
     strategy:
       fail-fast: false
       matrix:

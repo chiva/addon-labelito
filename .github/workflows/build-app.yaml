@@ -194,6 +194,13 @@ jobs:
 
       - name: Build and push image
         uses: home-assistant/builder/actions/build-image@4de35182ce1e329181bffcbcc84d33db5e2c7e10 # 2026.06.0
+        # The action signs the pushed digest with cosign keyless (Fulcio OIDC) in a 5-attempt
+        # retry loop. When the GitHub OIDC token is unavailable, cosign silently falls back to
+        # the interactive device flow, and each attempt blocks on a 300s device-code wait — so a
+        # misconfiguration burns ~28 min per arch before failing (see run 28756234885). The build
+        # and push themselves complete in ~2 min; this cap fails a hung signing loop fast instead
+        # of holding the runner for the full retry budget.
+        timeout-minutes: 10
         with:
           arch: ${{ matrix.arch }}
           container-registry-password: ${{ secrets.registry-token }}
