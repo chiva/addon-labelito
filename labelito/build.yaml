@@ -2,7 +2,7 @@
 # labelito image (already multi-arch), so both architectures point at the same tag. Renovate keeps
 # these in lockstep with the Dockerfile ARG default and config.yaml's `version` on every release.
 build_from:
-  aarch64: ghcr.io/chiva/labelito:0.4.0
-  amd64: ghcr.io/chiva/labelito:0.4.0
+  aarch64: ghcr.io/chiva/labelito:0.7.0
+  amd64: ghcr.io/chiva/labelito:0.7.0
 labels:
   io.hass.type: addon
