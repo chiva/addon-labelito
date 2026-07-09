@@ -5,7 +5,7 @@
 # here keeps a plain `docker build` working for local testing. Renovate bumps the tag in
 # build.yaml, this default, and config.yaml's `version` together (they must stay in lockstep —
 # the Supervisor pulls the wrapper tag named by the manifest).
-ARG BUILD_FROM=ghcr.io/chiva/labelito:0.4.0
+ARG BUILD_FROM=ghcr.io/chiva/labelito:0.7.0
 FROM ${BUILD_FROM}
 
 LABEL org.opencontainers.image.title="labelito add-on" \
