@@ -22,6 +22,7 @@ image fields, auto-numbering batches, and landscape die-cut address labels (17×
 | `printer_uri` | `tcp://192.168.1.100:9100` | Network printers: `tcp://<ip>:9100`. USB printers: `usb://0x04f9:0x209c` (`vendorId:productId` — find yours under **Settings → System → Hardware** or with `lsusb`). |
 | `api_token` | *(unset)* | Bearer token protecting the HTTP API. Optional while access is ingress-only; **required if you open the host port** (see below). |
 | `editor_enabled` | `false` | Enable the YAML template studio, including saving templates into this add-on's config folder. |
+| `inline_templates_enabled` | `false` | Allow print/preview API requests to submit a full template body inline (the `template_inline` field) instead of referencing a saved template. Respects the same authentication as other write calls — the `api_token` when set, otherwise available on the HA-authenticated ingress endpoint. |
 | `default_language` | `en` | Language for label chrome text (dates, headings) unless a print request overrides it. |
 | `log_level` | `info` | Web-server log verbosity. |
 | `history_keep_entries` | `1000` | Rows kept in the durable print history after pruning. |
@@ -50,6 +51,14 @@ Changes survive add-on updates and restarts.
 
 With `editor_enabled: true` the **Studio** tab edits and saves these files directly from
 the browser, with a live draft preview.
+
+With `inline_templates_enabled: true` a print/preview API call can carry a full template body
+inline (`template_inline`) instead of naming a saved template — handy for automations that
+build labels on the fly without persisting them.
+
+Custom assets live alongside the templates in the add-on's config folder: drop TrueType fonts
+into `fonts/` and custom icons into `icons/`. They are picked up automatically alongside
+labelito's bundled fonts and icon collections.
 
 Template format, fields, computed dates, icons, and QR codes are documented in the
 [labelito template guide](https://github.com/chiva/labelito#templates).
