@@ -61,6 +61,21 @@ def main() -> None:
     api_token = (options.get("api_token") or "").strip()
     editor_enabled = "true" if options.get("editor_enabled") else "false"
 
+    # The schema guarantees positive ints but cannot express the cross-field invariant:
+    # pruning trims back to keep_entries, so a prune threshold at or below it would never
+    # reduce the history. Reject it here with a clear error rather than forward a config
+    # that silently never prunes.
+    keep_entries = options.get("history_keep_entries", 1000)
+    prune_at_entries = options.get("history_prune_at_entries", 1500)
+    if prune_at_entries <= keep_entries:
+        log(
+            f"FATAL: history_prune_at_entries ({prune_at_entries}) must be greater than "
+            f"history_keep_entries ({keep_entries}) — pruning trims back to keep_entries, so "
+            "a threshold at or below it would never shrink the history. Adjust the add-on "
+            "configuration."
+        )
+        sys.exit(1)
+
     env = {
         "MODEL": options["model"],
         "PRINTER_URI": options["printer_uri"],
@@ -71,8 +86,8 @@ def main() -> None:
         "TEMPLATES_WRITABLE": editor_enabled,
         "LOG_LEVEL": options.get("log_level", "info"),
         # Bound the durable print-history DB (defaults match upstream and config.yaml).
-        "HISTORY_KEEP_ENTRIES": options.get("history_keep_entries", 1000),
-        "HISTORY_PRUNE_AT_ENTRIES": options.get("history_prune_at_entries", 1500),
+        "HISTORY_KEEP_ENTRIES": keep_entries,
+        "HISTORY_PRUNE_AT_ENTRIES": prune_at_entries,
         # Fixed add-on wiring, not user options: the ingress prefix header, durable history
         # in the Supervisor-managed /data, and user templates in the addon-config mount.
         "PROXY_PATH_HEADER": "X-Ingress-Path",
