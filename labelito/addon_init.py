@@ -84,16 +84,23 @@ def main() -> None:
         # always writable (/config), so an editor without server-save would just confuse.
         "EDITOR_ENABLED": editor_enabled,
         "TEMPLATES_WRITABLE": editor_enabled,
+        # Independent of the studio: gate accepting an inline template body on the print/preview
+        # API. Rides the existing write-endpoint auth (API_TOKEN / ALLOW_UNAUTHENTICATED).
+        "INLINE_TEMPLATES_ENABLED": "true" if options.get("inline_templates_enabled") else "false",
         "LOG_LEVEL": options.get("log_level", "info"),
         # Bound the durable print-history DB (defaults match upstream and config.yaml).
         "HISTORY_KEEP_ENTRIES": keep_entries,
         "HISTORY_PRUNE_AT_ENTRIES": prune_at_entries,
         # Fixed add-on wiring, not user options: the ingress prefix header, durable history
-        # in the Supervisor-managed /data, and user templates in the addon-config mount.
+        # in the Supervisor-managed /data, and user templates/fonts/icons in the addon-config
+        # mount. Fonts and icons are additive overlays — drop files in and they are picked up
+        # alongside labelito's bundled defaults (see run.sh, which creates the dirs).
         "PROXY_PATH_HEADER": "X-Ingress-Path",
         "HISTORY_MODE": "file",
         "DATA_DIR": "/data",
         "TEMPLATES_DIR": "/config/templates",
+        "FONTS_DIR": "/config/fonts",
+        "ICONS_DIR": "/config/icons",
         # The Supervisor/Renovate owns add-on updates — silence labelito's in-app update check.
         "UPDATE_CHECK_ENABLED": "false",
     }

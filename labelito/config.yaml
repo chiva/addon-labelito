@@ -5,7 +5,7 @@
 # Renovate bumps it together with the Dockerfile FROM tag, and the prepare job in build-app.yaml
 # fails the build (before any publish) if they ever drift apart.
 name: labelito
-version: "0.9.0"
+version: "0.10.0"
 slug: labelito
 description: Self-hosted label printing for Brother QL printers
 url: https://github.com/chiva/addon-labelito
@@ -43,6 +43,9 @@ options:
   model: QL-810W
   printer_uri: tcp://192.168.1.100:9100
   editor_enabled: false
+  # Accept a full template body inline on print/preview API calls instead of a saved name.
+  # Off by default (upstream default); rides the same auth as other write endpoints.
+  inline_templates_enabled: false
   default_language: en
   log_level: info
   # Bound the durable print-history SQLite DB: pruning triggers at prune_at_entries and trims
@@ -54,6 +57,7 @@ schema:
   printer_uri: str
   api_token: password?
   editor_enabled: bool
+  inline_templates_enabled: bool
   default_language: list(en|es|de|fr|it|nl|pl|pt)
   log_level: list(debug|info|warning|error)
   history_keep_entries: int(1,)

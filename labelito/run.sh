@@ -19,5 +19,9 @@ if [ -z "$(ls -A /config/templates)" ]; then
   echo "[labelito-addon] seeded /config/templates with the bundled example templates"
 fi
 
+# Additive user overlays: custom TTF fonts and icons dropped into these folders are picked up
+# alongside labelito's bundled fonts/icon collections. Created empty — no seeding needed.
+mkdir -p /config/fonts /config/icons
+
 # Single worker is intentional (in-process print lock + SQLite dedup) — see the upstream image.
 exec uvicorn app.main:app --host 0.0.0.0 --port 8765 --log-level "${LOG_LEVEL:-info}"

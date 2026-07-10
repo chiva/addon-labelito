@@ -4,6 +4,17 @@ The add-on version tracks the wrapped labelito release — see the
 [labelito changelog](https://github.com/chiva/labelito/blob/main/CHANGELOG.md) for the
 application itself. Entries here cover the add-on wrapper.
 
+## 0.10.0
+
+- Wraps labelito 0.10.0: print/preview API calls can now carry a full template body inline
+  (on-the-fly labels) instead of referencing a saved template.
+- Wrapper: adds the `inline_templates_enabled` option (off by default) to gate the inline
+  template feature; it rides the same authentication as other write endpoints.
+- Wrapper: mounts custom fonts and icons from the add-on config folder (`fonts/`, `icons/`),
+  picked up alongside labelito's bundled defaults.
+- Wrapper: adds the missing `history_keep_entries` / `history_prune_at_entries` labels to the
+  configuration UI (previously shown with raw option keys).
+
 ## 0.9.0
 
 - Wraps labelito 0.9.0: label gallery of rendered example templates, web image upload for
