@@ -5,7 +5,7 @@
 # Renovate bumps it together with the Dockerfile FROM tag, and the prepare job in build-app.yaml
 # fails the build (before any publish) if they ever drift apart.
 name: labelito
-version: "0.8.1"
+version: "0.9.0"
 slug: labelito
 description: Self-hosted label printing for Brother QL printers
 url: https://github.com/chiva/addon-labelito
