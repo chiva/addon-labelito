@@ -45,6 +45,10 @@ options:
   editor_enabled: false
   default_language: en
   log_level: info
+  # Bound the durable print-history SQLite DB: pruning triggers at prune_at_entries and trims
+  # back to keep_entries. Upstream defaults; expose them so high-volume setups can cap growth.
+  history_keep_entries: 1000
+  history_prune_at_entries: 1500
 schema:
   model: str
   printer_uri: str
@@ -52,3 +56,5 @@ schema:
   editor_enabled: bool
   default_language: list(en|es|de|fr|it|nl|pl|pt)
   log_level: list(debug|info|warning|error)
+  history_keep_entries: int(1,)
+  history_prune_at_entries: int(1,)
