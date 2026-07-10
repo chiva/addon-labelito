@@ -5,6 +5,9 @@ then print them from the web UI, the HTTP API, or Home Assistant automations. Th
 wraps the upstream [labelito](https://github.com/chiva/labelito) image — the add-on
 version always equals the wrapped labelito version.
 
+The web UI includes a label gallery of rendered example templates, image upload for label
+image fields, auto-numbering batches, and landscape die-cut address labels (17×54 and 29×90).
+
 ## Quick start
 
 1. Set **Printer model** and **Printer URI** in the configuration tab.
@@ -21,6 +24,12 @@ version always equals the wrapped labelito version.
 | `editor_enabled` | `false` | Enable the YAML template studio, including saving templates into this add-on's config folder. |
 | `default_language` | `en` | Language for label chrome text (dates, headings) unless a print request overrides it. |
 | `log_level` | `info` | Web-server log verbosity. |
+| `history_keep_entries` | `1000` | Rows kept in the durable print history after pruning. |
+| `history_prune_at_entries` | `1500` | Row count that triggers pruning back to `history_keep_entries`. Keep it above `history_keep_entries`. |
+
+labelito's in-app update check is disabled: this add-on is updated through the Home Assistant
+Supervisor (Renovate tracks upstream releases in the repository), so the About dialog does not
+prompt to update.
 
 ## Access and security
 
