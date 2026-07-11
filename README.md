@@ -1,10 +1,19 @@
+<div align="center">
+
+<a href="https://github.com/chiva/labelito"><img src="https://raw.githubusercontent.com/chiva/labelito/main/site/assets/labelito-logo.svg" alt="labelito" width="200"></a>
+
 # labelito Home Assistant Add-on
 
-Run [labelito](https://github.com/chiva/labelito) — self-hosted label printing for Brother QL
-printers — as a one-click Home Assistant add-on, with ingress-authenticated access and Supervisor
-discovery.
+*Self-hosted label printing for Brother QL printers — one-click in Home Assistant OS.*<br>
+lah-beh-LEE-toh · `/la.beˈli.to/` · a Spanish diminutive of "label"
 
-[![Add repository to my Home Assistant](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fchiva%2Faddon-labelito)
+[![Builder](https://github.com/chiva/addon-labelito/actions/workflows/builder.yaml/badge.svg)](https://github.com/chiva/addon-labelito/actions/workflows/builder.yaml)
+[![License: MIT](https://img.shields.io/github/license/chiva/addon-labelito)](LICENSE)
+
+</div>
+
+Run [labelito](https://github.com/chiva/labelito) as a one-click Home Assistant add-on, with
+ingress-authenticated access and Supervisor discovery.
 
 ## The labelito ecosystem
 
@@ -20,6 +29,8 @@ This add-on **announces itself** to the Supervisor, so `ha-labelito` sets up in 
 confirmation click once both are installed.
 
 ## Installation
+
+[![Add repository to my Home Assistant](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fchiva%2Faddon-labelito)
 
 1. Click the badge above (or add `https://github.com/chiva/addon-labelito` under
    **Settings → Add-ons → Add-on store → ⋮ → Repositories**).
