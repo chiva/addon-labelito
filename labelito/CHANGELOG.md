@@ -4,6 +4,19 @@ The add-on version tracks the wrapped labelito release — see the
 [labelito changelog](https://github.com/chiva/labelito/blob/main/CHANGELOG.md) for the
 application itself. Entries here cover the add-on wrapper.
 
+## 0.17.0
+
+- Wraps labelito 0.17.0. Notable application features accumulated since 0.10.0: a visual
+  drag-and-drop label builder in the Studio (0.15.0), draft printing from the Studio (0.13.0),
+  and a Model Context Protocol (MCP) server for AI clients (0.17.0).
+- Wrapper: adds the `mcp_enabled` option (off by default) to expose labelito's MCP server at
+  `/mcp` for AI clients, riding the same authentication as the HTTP API, plus `mcp_writable`
+  (off by default) to additionally expose the MCP print/reprint tools.
+- Wrapper: adds the `editor_default_mode` option (`visual` / `yaml`) to choose which surface
+  the template studio opens first.
+
+(0.11.0–0.16.0 were tag-only base-image bumps with no wrapper changes.)
+
 ## 0.10.0
 
 - Wraps labelito 0.10.0: print/preview API calls can now carry a full template body inline

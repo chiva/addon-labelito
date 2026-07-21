@@ -21,8 +21,11 @@ image fields, auto-numbering batches, and landscape die-cut address labels (17×
 | `model` | `QL-810W` | Brother QL model connected to this add-on. labelito cross-checks it against what the printer reports and flags a mismatch. |
 | `printer_uri` | `tcp://192.168.1.100:9100` | Network printers: `tcp://<ip>:9100`. USB printers: `usb://0x04f9:0x209c` (`vendorId:productId` — find yours under **Settings → System → Hardware** or with `lsusb`). |
 | `api_token` | *(unset)* | Bearer token protecting the HTTP API. Optional while access is ingress-only; **required if you open the host port** (see below). |
-| `editor_enabled` | `false` | Enable the YAML template studio, including saving templates into this add-on's config folder. |
+| `editor_enabled` | `false` | Enable the template studio, including saving templates into this add-on's config folder. |
+| `editor_default_mode` | `visual` | Which surface the studio opens first: `visual` (drag-and-drop block builder) or `yaml` (raw editor). Only applies when `editor_enabled` is on. |
 | `inline_templates_enabled` | `false` | Allow print/preview API requests to submit a full template body inline (the `template_inline` field) instead of referencing a saved template. Respects the same authentication as other write calls — the `api_token` when set, otherwise available on the HA-authenticated ingress endpoint. |
+| `mcp_enabled` | `false` | Expose a Model Context Protocol server at `/mcp` for AI clients (see **AI clients (MCP)** below). Rides the same authentication as the HTTP API. |
+| `mcp_writable` | `false` | Also expose the MCP print/reprint tools (not just label generation and preview). No effect unless `mcp_enabled` is on. |
 | `default_language` | `en` | Language for label chrome text (dates, headings) unless a print request overrides it. |
 | `log_level` | `info` | Web-server log verbosity. |
 | `history_keep_entries` | `1000` | Rows kept in the durable print history after pruning. |
@@ -50,7 +53,8 @@ Server add-ons). On first start the folder is seeded with the bundled example te
 Changes survive add-on updates and restarts.
 
 With `editor_enabled: true` the **Studio** tab edits and saves these files directly from
-the browser, with a live draft preview.
+the browser, with a live draft preview. Set `editor_default_mode` to choose which surface it
+opens first — the `visual` drag-and-drop block builder (default) or the raw `yaml` editor.
 
 With `inline_templates_enabled: true` a print/preview API call can carry a full template body
 inline (`template_inline`) instead of naming a saved template — handy for automations that
@@ -62,6 +66,17 @@ labelito's bundled fonts and icon collections.
 
 Template format, fields, computed dates, icons, and QR codes are documented in the
 [labelito template guide](https://github.com/chiva/labelito#templates).
+
+## AI clients (MCP)
+
+With `mcp_enabled: true` labelito serves a Model Context Protocol server at `/mcp`, letting
+AI clients generate and preview labels programmatically. It rides the **same authentication**
+as the HTTP API: reachable through the HA-authenticated ingress endpoint, or via the direct
+port when you set an `api_token` and open it.
+
+By default the MCP tools are read-only (label generation and preview). Set `mcp_writable: true`
+to also expose the print and reprint tools so an AI client can trigger physical prints — off by
+default, and inert unless `mcp_enabled` is also on.
 
 ## Printers
 

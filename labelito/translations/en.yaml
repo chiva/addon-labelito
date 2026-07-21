@@ -17,13 +17,28 @@ configuration:
   editor_enabled:
     name: Template studio
     description: >-
-      Enable the YAML template studio, including saving templates into this add-on's
-      config folder.
+      Enable the template studio, including saving templates into this add-on's config
+      folder. Opens in the visual block builder or raw YAML per the option below.
+  editor_default_mode:
+    name: Studio default mode
+    description: >-
+      Which authoring surface the studio opens first: the visual drag-and-drop block
+      builder or raw YAML. Only applies when the template studio is enabled.
   inline_templates_enabled:
     name: Inline templates via API
     description: >-
       Allow print/preview API requests to submit a full template body inline instead of
       referencing a saved template. Off by default; respects the API token when one is set.
+  mcp_enabled:
+    name: MCP server
+    description: >-
+      Expose a Model Context Protocol server at /mcp so AI clients can generate and preview
+      labels. Off by default; when on it rides the same authentication as the HTTP API.
+  mcp_writable:
+    name: MCP print tools
+    description: >-
+      Also let MCP clients trigger physical prints and reprints, not just previews. Off by
+      default; has no effect unless the MCP server above is enabled.
   default_language:
     name: Default label language
     description: Language used for label chrome text unless a print request overrides it.
