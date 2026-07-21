@@ -61,6 +61,17 @@ def main() -> None:
     api_token = (options.get("api_token") or "").strip()
     editor_enabled = "true" if options.get("editor_enabled") else "false"
 
+    # The MCP write toggle only does anything once the MCP server itself is enabled. Warn on the
+    # inert combination rather than silently forwarding it — not fatal, MCP_WRITABLE is simply a
+    # no-op without MCP_ENABLED.
+    mcp_enabled = "true" if options.get("mcp_enabled") else "false"
+    mcp_writable = "true" if options.get("mcp_writable") else "false"
+    if mcp_writable == "true" and mcp_enabled == "false":
+        log(
+            "WARNING: mcp_writable is on but mcp_enabled is off — the MCP write tools have no "
+            "effect without the MCP server. Enable mcp_enabled to use them."
+        )
+
     # The schema guarantees positive ints but cannot express the cross-field invariant:
     # pruning trims back to keep_entries, so a prune threshold at or below it would never
     # reduce the history. Reject it here with a clear error rather than forward a config
@@ -84,9 +95,16 @@ def main() -> None:
         # always writable (/config), so an editor without server-save would just confuse.
         "EDITOR_ENABLED": editor_enabled,
         "TEMPLATES_WRITABLE": editor_enabled,
+        # Which surface the studio opens first (block builder vs raw YAML); inert unless the
+        # studio is enabled. Defaults to labelito's own default.
+        "EDITOR_DEFAULT_MODE": options.get("editor_default_mode", "visual"),
         # Independent of the studio: gate accepting an inline template body on the print/preview
         # API. Rides the existing write-endpoint auth (API_TOKEN / ALLOW_UNAUTHENTICATED).
         "INLINE_TEMPLATES_ENABLED": "true" if options.get("inline_templates_enabled") else "false",
+        # Model Context Protocol server at /mcp for AI clients, behind the same auth as the REST
+        # API. MCP_WRITABLE gates the print/reprint tools (read-only otherwise).
+        "MCP_ENABLED": mcp_enabled,
+        "MCP_WRITABLE": mcp_writable,
         "LOG_LEVEL": options.get("log_level", "info"),
         # Bound the durable print-history DB (defaults match upstream and config.yaml).
         "HISTORY_KEEP_ENTRIES": keep_entries,
