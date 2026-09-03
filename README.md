@@ -8,6 +8,7 @@
 lah-beh-LEE-toh · `/la.beˈli.to/` · a Spanish diminutive of "label"
 
 [![Builder](https://github.com/chiva/addon-labelito/actions/workflows/builder.yaml/badge.svg)](https://github.com/chiva/addon-labelito/actions/workflows/builder.yaml)
+[![Lint](https://github.com/chiva/addon-labelito/actions/workflows/lint.yaml/badge.svg)](https://github.com/chiva/addon-labelito/actions/workflows/lint.yaml)
 [![License: MIT](https://img.shields.io/github/license/chiva/addon-labelito)](LICENSE)
 
 </div>
