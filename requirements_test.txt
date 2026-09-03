@@ -1,0 +1,5 @@
+# pytest only — addon_init.py imports nothing outside the standard library, which is what lets it
+# run in the upstream image without adding a single dependency to it. Keep it that way: anything
+# that appears here must be test-only.
+pytest>=8.4.2
+pytest-cov>=7.1.0

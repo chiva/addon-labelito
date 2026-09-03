@@ -1,0 +1,41 @@
+# Unit tests for the add-on entrypoint. addon_init.py is the only Python in this repo, and it
+# decides what labelito is configured with, whether the service starts at all, and whether it
+# starts unauthenticated — so it gets the same treatment as the linters next door.
+name: Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  pytest:
+    name: Pytest
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          # The add-on image is built FROM the upstream labelito image, whose runtime stage is
+          # python:3.13-slim-trixie — so 3.13 is the interpreter this script actually runs under.
+          # Not a matrix: there is exactly one runtime, and testing a version the script never
+          # sees would be a check measuring the wrong thing.
+          python-version: "3.13"
+          cache: pip
+
+      - run: pip install -r requirements_test.txt
+
+      - name: Run tests
+        # The coverage floor lives in pyproject.toml, so a bare `--cov` gates identically here and
+        # locally (same arrangement as labelito and ha-labelito). No Codecov upload: one file with
+        # a 100%-covered local gate does not need a third external project to publish a number
+        # nobody would consult.
+        run: pytest --cov --cov-report=term-missing
