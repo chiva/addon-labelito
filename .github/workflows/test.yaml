@@ -28,7 +28,7 @@ jobs:
           # python:3.13-slim-trixie — so 3.13 is the interpreter this script actually runs under.
           # Not a matrix: there is exactly one runtime, and testing a version the script never
           # sees would be a check measuring the wrong thing.
-          python-version: "3.13"
+          python-version: "3.14"
           cache: pip
 
       - run: pip install -r requirements_test.txt
