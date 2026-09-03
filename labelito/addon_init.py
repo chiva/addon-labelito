@@ -18,6 +18,7 @@ The ADDON_*/SUPERVISOR_URL env overrides exist for the test harness only; under 
 Supervisor the defaults are always correct.
 """
 
+import http.client
 import json
 import os
 import shlex
@@ -51,7 +52,17 @@ def supervisor_call(path: str, payload: dict | None = None) -> dict | None:
     try:
         with urllib.request.urlopen(request, timeout=HTTP_TIMEOUT_S) as response:
             return json.load(response)
-    except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as exc:
+    # http.client.HTTPException is in the net because it is NOT an OSError: urllib wraps socket
+    # errors in URLError, but a malformed or truncated reply raises IncompleteRead/BadStatusLine
+    # from .read() inside json.load, which subclasses only HTTPException. Without it those escape
+    # and take the add-on's startup down — against this function's whole contract, which is that
+    # a Supervisor problem is reported and skipped, never fatal.
+    except (
+        urllib.error.URLError,
+        http.client.HTTPException,
+        TimeoutError,
+        json.JSONDecodeError,
+    ) as exc:
         log(f"Supervisor call {path} failed: {exc}")
         return None
 

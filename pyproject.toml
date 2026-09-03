@@ -1,0 +1,28 @@
+# Tool configuration only — deliberately no [project] table. This repository is a Home Assistant
+# add-on wrapper, not a Python package: nothing here is built, installed or published. The single
+# Python file (labelito/addon_init.py) is copied into the image and run by run.sh.
+#
+# It runs under the interpreter of the base image, which is the upstream labelito image and
+# therefore python:3.13-slim-trixie. The test workflow pins 3.13 for that reason — testing the
+# script on a version it never runs under would be a check that measures the wrong thing.
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = ["-v", "--tb=short"]
+# addon_init.py is a standalone script, not an importable package (labelito/ has no __init__.py),
+# so put its directory on the path rather than inventing packaging for one file.
+pythonpath = ["labelito"]
+
+[tool.coverage.run]
+source = ["labelito"]
+
+[tool.coverage.report]
+# Higher than the 85 used by labelito and ha-labelito, and deliberately so: this is one file of
+# straight-line configuration translation with no hardware, framework or real network in the way,
+# so there is no honest excuse for an uncovered branch. Measured at 100%; the floor sits at 95 so
+# a single new line can land with its test in the same commit rather than blocking on ordering.
+fail_under = 95
+show_missing = true
+# The __main__ guard calls main() only when run as a script, which importing for tests never
+# does. Excluded rather than left as a permanent 1-line miss, so the report reads honestly.
+exclude_also = ['if __name__ == "__main__":']
