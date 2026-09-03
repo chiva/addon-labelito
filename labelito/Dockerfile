@@ -16,7 +16,10 @@ LABEL org.opencontainers.image.title="labelito add-on" \
 # The upstream image runs as uid 1000, but under the Supervisor the mapped /data, /config,
 # and USB device nodes are root-owned — run as root, the add-on convention (the Supervisor
 # sandboxes the container).
-USER root
+#
+# Spelled as the numeric uid rather than `root` on purpose: hadolint's DL3066 warns that a
+# non-numeric user-id may not be resolvable, and 0 needs no /etc/passwd lookup to mean root.
+USER 0
 
 COPY run.sh addon_init.py /
 RUN chmod 755 /run.sh
