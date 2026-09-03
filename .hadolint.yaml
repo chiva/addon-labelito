@@ -1,6 +1,11 @@
 # Home Assistant add-ons run as root under the Supervisor sandbox; labelito/Dockerfile
-# deliberately ends on `USER root` so the mapped /data, /config, and USB device nodes
-# (all root-owned) are accessible. Hadolint flags a final `USER root` as DL3002, but it is
+# deliberately ends on `USER 0` so the mapped /data, /config, and USB device nodes
+# (all root-owned) are accessible. Hadolint flags a final root user as DL3002, but it is
 # the required add-on convention here, so the rule is ignored intentionally.
+#
+# DL3002 treats the numeric spelling as root too, so writing `USER 0` does not sidestep it —
+# this ignore is still doing the work. What the numeric form does silence is DL3066
+# ("non-numeric user-id may not be resolvable"), which is satisfied rather than muted, so it
+# stays off this list.
 ignored:
   - DL3002
