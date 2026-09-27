@@ -19,8 +19,9 @@ if [ -z "$(ls -A /config/templates)" ]; then
   echo "[labelito-addon] seeded /config/templates with the bundled example templates"
 fi
 
-# Additive user overlays: custom TTF fonts and icons dropped into these folders are picked up
-# alongside labelito's bundled fonts/icon collections. Created empty — no seeding needed.
+# User overlays: icons dropped into icons/ are picked up alongside labelito's bundled icon
+# collections; fonts/ only overrides DejaVu Sans (label fonts are baked into the upstream image).
+# Created empty — no seeding needed.
 mkdir -p /config/fonts /config/icons
 
 # Single worker is intentional (in-process print lock + SQLite dedup) — see the upstream image.

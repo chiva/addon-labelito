@@ -122,8 +122,8 @@ def main() -> None:
         "HISTORY_PRUNE_AT_ENTRIES": prune_at_entries,
         # Fixed add-on wiring, not user options: the ingress prefix header, durable history
         # in the Supervisor-managed /data, and user templates/fonts/icons in the addon-config
-        # mount. Fonts and icons are additive overlays — drop files in and they are picked up
-        # alongside labelito's bundled defaults (see run.sh, which creates the dirs).
+        # mount. Icons are an additive overlay on labelito's bundled collections; the fonts dir
+        # only overrides DejaVu Sans (see run.sh, which creates the dirs).
         "PROXY_PATH_HEADER": "X-Ingress-Path",
         "HISTORY_MODE": "file",
         "DATA_DIR": "/data",

@@ -6,7 +6,8 @@ wraps the upstream [labelito](https://github.com/chiva/labelito) image — the a
 version always equals the wrapped labelito version.
 
 The web UI includes a label gallery of rendered example templates, image upload for label
-image fields, auto-numbering batches, and landscape die-cut address labels (17×54 and 29×90).
+image fields, auto-numbering batches, landscape labels on both die-cut and continuous media,
+28 selectable label fonts, and dot-exact QR, Data Matrix, Aztec, and PDF417 codes.
 
 ## Quick start
 
@@ -60,12 +61,29 @@ With `inline_templates_enabled: true` a print/preview API call can carry a full 
 inline (`template_inline`) instead of naming a saved template — handy for automations that
 build labels on the fly without persisting them.
 
-Custom assets live alongside the templates in the add-on's config folder: drop TrueType fonts
-into `fonts/` and custom icons into `icons/`. They are picked up automatically alongside
-labelito's bundled fonts and icon collections.
+Label fonts are picked per template or per element with a `font:` key (`inter`,
+`courier-prime`, `dseg7-classic`, …); all 28 families ship inside the image, so there is
+nothing to install. Custom icons dropped into the config folder's `icons/` are picked up
+alongside labelito's bundled icon collections. The `fonts/` folder only overrides the default
+DejaVu Sans (`DejaVuSans.ttf` / `DejaVuSans-Bold.ttf`); any other file there is ignored.
 
-Template format, fields, computed dates, icons, and QR codes are documented in the
-[labelito template guide](https://github.com/chiva/labelito#templates).
+Template format, fields, computed dates, fonts, icons, and codes are documented in the
+[labelito template guide](https://github.com/chiva/labelito/blob/main/docs/template-format.md).
+
+### Upgrading to 1.0.0
+
+A template with `rotate: 90` or `270` on **continuous** tape (e.g. `label: "62"`) must now
+declare `length` in millimetres (20–300), the landscape length along the tape:
+
+```yaml
+label: "62"
+rotate: 90
+length: 100
+```
+
+Such templates used to load and print distorted; labelito 1.0.0 refuses to load them and logs
+why. Die-cut labels (`17x54`, `29x90`, …) and `rotate: 0`/`180` are unaffected, as are the
+example templates seeded on first start.
 
 ## AI clients (MCP)
 
@@ -94,7 +112,7 @@ durably in the add-on's private data folder and survives restarts and updates.
 
 ## Home Assistant integration
 
-The add-on announces itself to the Supervisor's discovery registry, so the upcoming
-`ha-labelito` integration can be set up with one click — printer status sensors, a
-`labelito.print` service for automations, and voice intents. Until it ships, automations
-can call the HTTP API directly with a `rest_command`.
+The add-on announces itself to the Supervisor's discovery registry, so the
+[ha-labelito](https://github.com/chiva/ha-labelito) integration (in the HACS default store)
+is set up with one click — printer status sensors, a `labelito.print` service for
+automations, and voice intents.
