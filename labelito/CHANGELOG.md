@@ -4,6 +4,22 @@ The add-on version tracks the wrapped labelito release — see the
 [labelito changelog](https://github.com/chiva/labelito/blob/main/CHANGELOG.md) for the
 application itself. Entries here cover the add-on wrapper.
 
+## 1.0.0
+
+- Wraps labelito 1.0.0: landscape layouts on continuous tape via a template `length`, 28
+  selectable label fonts with per-character fallback, font-relative `line_height` and
+  `letter_spacing`, dot-exact QR / Data Matrix / Aztec / PDF417 codes, and ITF-14 barcodes.
+  Accumulated since 0.17.0: OIDC auth for `/mcp` (0.18.0), MCP template authoring and
+  spoken-name `aliases` on templates (0.19.0).
+- **Breaking (upstream):** a template with `rotate: 90`/`270` on continuous tape now requires
+  `length` (mm) and otherwise fails to load. Such templates previously printed distorted. Check
+  the add-on log for `Failed to load template` after updating — see **Upgrading to 1.0.0** in
+  the documentation.
+- Wrapper: corrects the documentation of the config folder's `fonts/`: it overrides DejaVu Sans
+  only, and label fonts are selected with `font:` instead.
+
+(0.18.0–0.19.0 were tag-only base-image bumps with no wrapper changes.)
+
 ## 0.17.0
 
 - Wraps labelito 0.17.0. Notable application features accumulated since 0.10.0: a visual
