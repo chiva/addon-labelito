@@ -31,6 +31,12 @@
       "minimumReleaseAge": "0 days"
     },
     {
+      "description": "The Test workflow's setup-python version must equal the interpreter the add-on actually runs under: the upstream labelito image's runtime stage (python:3.13-slim-trixie as of labelito 1.0.0). Hold it on 3.13 so Renovate cannot drift it ahead of the runtime; raise this bound when labelito's Dockerfile moves to a newer Python.",
+      "matchManagers": ["github-actions"],
+      "matchDepNames": ["python"],
+      "allowedVersions": "<3.14"
+    },
+    {
       "description": "config:best-practices enables docker:pinDigests, but the wrapped-labelito base is intentionally tracked by human-readable version tag (kept in lockstep across config.yaml, build.yaml, and the Dockerfile ARG, and verifiable via the signed upstream image). Digest-pinning it would break that invariant, so keep tag-based updates for Docker while retaining Action SHA pinning.",
       "matchDatasources": ["docker"],
       "pinDigests": false
