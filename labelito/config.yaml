@@ -6,7 +6,7 @@
 # fails the build (before any publish) if they ever drift apart.
 name: labelito
 # renovate: datasource=docker depName=ghcr.io/chiva/labelito
-version: "1.0.0"
+version: "1.0.1"
 slug: labelito
 description: Self-hosted label printing for Brother QL printers
 url: https://github.com/chiva/addon-labelito
