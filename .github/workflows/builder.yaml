@@ -28,17 +28,17 @@ jobs:
       changed_apps: ${{ steps.filter.outputs.changed_apps }}
     steps:
       - name: Check out the repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
       - name: Get changed files
         id: changed_files
-        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
 
       - name: Find add-on directories
         id: apps
-        uses: home-assistant/actions/helpers/find-addons@06749dd8c0b54f350bc69c8752456cee498808a3 # master
+        uses: home-assistant/actions/helpers/find-addons@86d4564712fa02543c808e3a693dd04f9d3f8361 # master
 
       - name: Filter changed add-ons
         id: filter
