@@ -24,7 +24,7 @@ jobs:
           persist-credentials: false
 
       - name: Run Home Assistant add-on linter
-        uses: frenck/action-addon-linter@d51677290aef26cdfc835271dd3c7343ce502809 # v2.21
+        uses: frenck/action-addon-linter@d51677290aef26cdfc835271dd3c7343ce502809 # v2.21.2
         with:
           path: "./labelito"
 
